@@ -25,17 +25,55 @@ model User {
   role     Role   @default(USER)
 }
 
-enum Condition {
-  excellent
-  good
-  fair
-  poor
+model Profile {
+  id        Int               @id @default(autoincrement())
+  email     String            @unique
+  firstName String?
+  lastName  String?
+  bio       String?
+  title     String?
+  picture   String?
+  interests ProfileInterest[]
+  projects  ProfileProject[]
 }
 
-model Stuff {
-  id        Int       @id @default(autoincrement())
-  name      String
-  quantity  Int
-  condition Condition
-  owner     String
+model Interest {
+  id       Int               @id @default(autoincrement())
+  name     String            @unique
+  profiles ProfileInterest[]
+  projects ProjectInterest[]
+}
+
+model Project {
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  homepage    String?
+  description String?
+  picture     String?
+  profiles    ProfileProject[]
+  interests   ProjectInterest[]
+}
+
+model ProfileInterest {
+  id         Int      @id @default(autoincrement())
+  profileId  Int
+  interestId Int
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  interest   Interest @relation(fields: [interestId], references: [id])
+}
+
+model ProfileProject {
+  id        Int     @id @default(autoincrement())
+  profileId Int
+  projectId Int
+  profile   Profile @relation(fields: [profileId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectInterest {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  interestId Int
+  project    Project  @relation(fields: [projectId], references: [id])
+  interest   Interest @relation(fields: [interestId], references: [id])
 }

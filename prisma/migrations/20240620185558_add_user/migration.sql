@@ -1,8 +1,12 @@
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 
--- CreateEnum
-CREATE TYPE "Condition" AS ENUM ('excellent', 'good', 'fair', 'poor');
+-- AlterTable
+ALTER TABLE "Profile" ALTER COLUMN "firstName" DROP NOT NULL,
+ALTER COLUMN "lastName" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Project" ALTER COLUMN "description" DROP NOT NULL;
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -12,17 +16,6 @@ CREATE TABLE "User" (
     "role" "Role" NOT NULL DEFAULT 'USER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Stuff" (
-    "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-    "quantity" INTEGER NOT NULL,
-    "condition" "Condition" NOT NULL,
-    "owner" TEXT NOT NULL,
-
-    CONSTRAINT "Stuff_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
