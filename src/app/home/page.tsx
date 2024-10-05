@@ -12,7 +12,7 @@ const HomePageHelper = async () => {
   loggedInProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
-    } | null
+    } | null,
   );
   const email = (session && session.user && session.user.email) || '';
   const profile = await prisma.profile.findUnique({
@@ -43,7 +43,7 @@ const HomePageHelper = async () => {
     // profileInterests,
     // profileProjects,
     profileInterestNames,
-    profileProjectNames
+    profileProjectNames,
   );
   return <HomePage />;
 };
