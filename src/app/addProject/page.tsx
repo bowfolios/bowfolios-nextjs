@@ -11,7 +11,7 @@ const AddProjectPage = async () => {
   loggedInProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
-    } | null
+    } | null,
   );
   const interests = await prisma.interest.findMany();
   const participants = await prisma.user.findMany();

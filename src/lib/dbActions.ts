@@ -1,72 +1,37 @@
 'use server';
 
-import { Stuff, Condition } from '@prisma/client';
-import { hash } from 'bcrypt';
-import { redirect } from 'next/navigation';
+import { compare, hash } from 'bcrypt';
 import { prisma } from './prisma';
 
-/**
- * Adds a new stuff to the database.
- * @param stuff, an object with the following properties: name, quantity, owner, condition.
- */
-export async function addStuff(stuff: { name: string; quantity: number; owner: string; condition: string }) {
-  // console.log(`addStuff data: ${JSON.stringify(stuff, null, 2)}`);
-  let condition: Condition = 'good';
-  if (stuff.condition === 'poor') {
-    condition = 'poor';
-  } else if (stuff.condition === 'excellent') {
-    condition = 'excellent';
-  } else {
-    condition = 'fair';
+export async function getUser(email: string) {
+  // console.log(`getUser data: ${email}`);
+  // eslint-disable-next-line @typescript-eslint/return-await
+  return await prisma.user.findUnique({
+    where: { email },
+  });
+}
+
+export async function checkPassword(credentials: { email: string; password: string }) {
+  // console.log(`checkPassword data: ${JSON.stringify(credentials, null, 2)}`);
+  const user = await getUser(credentials.email);
+  if (!user) {
+    return false;
   }
-  await prisma.stuff.create({
+  // eslint-disable-next-line @typescript-eslint/return-await
+  return await compare(credentials.password, user.password);
+}
+
+export async function changePassword(credentials: { email: string; password: string }) {
+  // console.log(`changePassword data: ${JSON.stringify(credentials, null, 2)}`);
+  const password = await hash(credentials.password, 10);
+  await prisma.user.update({
+    where: { email: credentials.email },
     data: {
-      name: stuff.name,
-      quantity: stuff.quantity,
-      owner: stuff.owner,
-      condition,
+      password,
     },
   });
-  // After adding, redirect to the list page
-  redirect('/list');
 }
 
-/**
- * Edits an existing stuff in the database.
- * @param stuff, an object with the following properties: id, name, quantity, owner, condition.
- */
-export async function editStuff(stuff: Stuff) {
-  // console.log(`editStuff data: ${JSON.stringify(stuff, null, 2)}`);
-  await prisma.stuff.update({
-    where: { id: stuff.id },
-    data: {
-      name: stuff.name,
-      quantity: stuff.quantity,
-      owner: stuff.owner,
-      condition: stuff.condition,
-    },
-  });
-  // After updating, redirect to the list page
-  redirect('/list');
-}
-
-/**
- * Deletes an existing stuff from the database.
- * @param id, the id of the stuff to delete.
- */
-export async function deleteStuff(id: number) {
-  // console.log(`deleteStuff id: ${id}`);
-  await prisma.stuff.delete({
-    where: { id },
-  });
-  // After deleting, redirect to the list page
-  redirect('/list');
-}
-
-/**
- * Creates a new user in the database.
- * @param credentials, an object with the following properties: email, password.
- */
 export async function createUser(credentials: { email: string; password: string }) {
   // console.log(`createUser data: ${JSON.stringify(credentials, null, 2)}`);
   const password = await hash(credentials.password, 10);
@@ -78,17 +43,92 @@ export async function createUser(credentials: { email: string; password: string 
   });
 }
 
-/**
- * Changes the password of an existing user in the database.
- * @param credentials, an object with the following properties: email, password.
- */
-export async function changePassword(credentials: { email: string; password: string }) {
-  // console.log(`changePassword data: ${JSON.stringify(credentials, null, 2)}`);
-  const password = await hash(credentials.password, 10);
-  await prisma.user.update({
-    where: { email: credentials.email },
-    data: {
-      password,
+export async function createProject(project: any) {
+  // console.log(`createProject data: ${JSON.stringify(project, null, 2)}`);
+  const dbProject = await prisma.project.create({
+    data: project,
+  });
+  return dbProject;
+}
+
+export async function upsertProject(project: any) {
+  // console.log(`upsertProject data: ${JSON.stringify(project, null, 2)}`);
+  const dbProject = await prisma.project.upsert({
+    where: { name: project.name },
+    update: {},
+    create: {
+      name: project.name,
+      description: project.description,
+      homepage: project.homepage,
+      picture: project.picture,
     },
+  });
+  project.interests.forEach(async (intere: string) => {
+    const dbInterest = await prisma.interest.findUnique({
+      where: { name: intere },
+    });
+    // console.log(`${dbProject.name} ${dbInterest!.name}`);
+    const dbProjectInterest = await prisma.projectInterest.findMany({
+      where: { projectId: dbProject.id, interestId: dbInterest!.id },
+    });
+    if (dbProjectInterest.length === 0) {
+      await prisma.projectInterest.create({
+        data: {
+          projectId: dbProject.id,
+          interestId: dbInterest!.id,
+        },
+      });
+    }
+  });
+  project.participants.forEach(async (email: string) => {
+    const dbProfile = await prisma.profile.findUnique({
+      where: { email },
+    });
+    const dbProfileProject = await prisma.profileProject.findMany({
+      where: { projectId: dbProject.id, profileId: dbProfile!.id },
+    });
+    if (dbProfileProject.length === 0) {
+      await prisma.profileProject.create({
+        data: {
+          projectId: dbProject.id,
+          profileId: dbProfile!.id,
+        },
+      });
+    }
+  });
+  return dbProject;
+}
+
+export async function updateProfile(profile: any) {
+  console.log(`updateProfile data: ${JSON.stringify(profile, null, 2)}`);
+  const dbProfile = await prisma.profile.upsert({
+    where: { email: profile.name },
+    update: {
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      bio: profile.bio,
+    },
+    create: {
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      bio: profile.bio,
+      email: profile.email,
+    },
+  });
+  profile.interests.forEach(async (intere: string) => {
+    const dbInterest = await prisma.interest.findUnique({
+      where: { name: intere },
+    });
+    const dbProfileInterest = await prisma.profileInterest.findMany({
+      where: { profileId: dbProfile.id, interestId: dbInterest!.id },
+    });
+    if (dbProfileInterest.length === 0) {
+      await prisma.profileInterest.create({
+        data: {
+          profileId: dbProfile.id,
+          interestId: dbInterest!.id,
+        },
+      });
+    }
   });
 }

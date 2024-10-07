@@ -1,6 +1,7 @@
 /* eslint-disable import/extensions */
 import React from 'react';
 import { getServerSession } from 'next-auth';
+import { Profile, Interest, Project } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import { authOptions } from '../api/auth/[...nextauth]/route';
@@ -25,27 +26,26 @@ const HomePageHelper = async () => {
   const profileInterests = await prisma.profileInterest.findMany({
     where: { profileId: profile!.id },
   });
-  const profileInterestNames = profileInterests.map((profileInterest) => {
+  const proInterests: Interest[] = profileInterests.map((profileInterest) => {
     const i = interests.find((interest) => interest.id === profileInterest.interestId);
-    return i ? i.name : '';
+    return i as Interest;
   });
-  console.log(profileInterestNames);
   const profileProjects = await prisma.profileProject.findMany({
     where: { profileId: profile!.id },
   });
-  const profileProjectNames = profileProjects.map((profileProject) => {
+  const proProjects: Project[] = profileProjects.map((profileProject) => {
     const p = projects.find((project) => project.id === profileProject.projectId);
-    return p ? p.name : '';
+    return p as Project;
   });
-  console.log(
-    // interests,
-    // projects,
-    // profileInterests,
-    // profileProjects,
-    profileInterestNames,
-    profileProjectNames,
+  return (
+    <HomePage
+      profile={profile as Profile}
+      interests={interests}
+      projects={projects}
+      profileInterests={proInterests}
+      profileProjects={proProjects}
+    />
   );
-  return <HomePage />;
 };
 
 export default HomePageHelper;

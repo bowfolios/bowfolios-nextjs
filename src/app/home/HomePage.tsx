@@ -1,16 +1,37 @@
+/* eslint-disable react/jsx-one-expression-per-line */
+
 'use client';
 
 import React from 'react';
 import { Container, Col } from 'react-bootstrap';
-import { PageIDs } from '../../utilities/ids';
-import pageStyle from '../../utilities/pageStyle';
+import { PageIDs } from '@/utilities/ids';
+import pageStyle from '@/utilities/pageStyle';
+import { Profile, Interest, Project } from '@prisma/client';
+import ProfileForm from '@/components/ProfileForm';
 
-const HomePage = () => (
-  <Container id={PageIDs.homePage} className="justify-content-center" style={pageStyle}>
+const HomePage = ({
+  profile,
+  interests,
+  projects,
+  profileInterests,
+  profileProjects,
+}: {
+  profile: Profile;
+  interests: Interest[];
+  projects: Project[];
+  profileInterests: Interest[];
+  profileProjects: Project[];
+}) => (
+  <Container id={PageIDs.homePage} style={pageStyle}>
     <Col>
-      <Col className="justify-content-center text-center">
-        <h2>Your Profile</h2>
-      </Col>
+      <h2 className="text-center">Your Profile</h2>
+      <ProfileForm
+        profile={profile}
+        interests={interests}
+        projects={projects}
+        profileInterests={profileInterests}
+        profileProjects={profileProjects}
+      />
     </Col>
   </Container>
 );
