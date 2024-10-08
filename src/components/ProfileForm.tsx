@@ -10,6 +10,7 @@ import swal from 'sweetalert';
 import Multiselect from 'multiselect-react-dropdown';
 import { IProfile, ProfileSchema } from '@/lib/validationSchemas';
 import { Interest, Profile, Project } from '@prisma/client';
+import { updateProfile } from '@/lib/dbActions';
 
 const ProfileForm = ({
   profile,
@@ -41,13 +42,13 @@ const ProfileForm = ({
 
   const onSubmit = async (data: IProfile) => {
     console.log(data);
-    // const result = await upsertProject(data);
-    // if (result) {
-    //   swal('Success!', 'Project data saved successfully!', 'success');
-    //   reset();
-    // } else {
-    //   swal('Error!', 'Failed to save project data!', 'error');
-    // }
+    const result = await updateProfile(data);
+    if (result) {
+      swal('Success!', 'Project data saved successfully!', 'success');
+      reset();
+    } else {
+      swal('Error!', 'Failed to save project data!', 'error');
+    }
   };
   return (
     <Container>
@@ -72,7 +73,7 @@ const ProfileForm = ({
               <Col xs={4}>
                 <Form.Group controlId="email">
                   <Form.Label>Email</Form.Label>
-                  <Form.Control type="text" {...register('email')} defaultValue={profile.email!} readOnly disabled />
+                  <Form.Control type="text" {...register('email')} defaultValue={profile.email!} readOnly />
                   <Form.Text className="text-danger">{errors.email?.message}</Form.Text>
                 </Form.Group>
               </Col>
@@ -103,7 +104,7 @@ const ProfileForm = ({
                       <Multiselect
                         options={interestNames}
                         isObject={false}
-                        showCheckbox
+                        // showCheckbox
                         hidePlaceholder
                         closeOnSelect={false}
                         onSelect={onChange}
@@ -124,7 +125,7 @@ const ProfileForm = ({
                       <Multiselect
                         options={projectNames}
                         isObject={false}
-                        showCheckbox
+                        // showCheckbox
                         hidePlaceholder
                         closeOnSelect={false}
                         onSelect={onChange}

@@ -102,7 +102,7 @@ export async function upsertProject(project: any) {
 export async function updateProfile(profile: any) {
   console.log(`updateProfile data: ${JSON.stringify(profile, null, 2)}`);
   const dbProfile = await prisma.profile.upsert({
-    where: { email: profile.name },
+    where: { email: profile.email },
     update: {
       firstName: profile.firstName,
       lastName: profile.lastName,
@@ -115,20 +115,45 @@ export async function updateProfile(profile: any) {
       email: profile.email,
     },
   });
-  profile.interests.forEach(async (intere: string) => {
-    const dbInterest = await prisma.interest.findUnique({
-      where: { name: intere },
+  if (profile.interests) {
+    // Delete all profile interests
+    await prisma.profileInterest.deleteMany({
+      where: { profileId: dbProfile.id },
     });
-    const dbProfileInterest = await prisma.profileInterest.findMany({
-      where: { profileId: dbProfile.id, interestId: dbInterest!.id },
-    });
-    if (dbProfileInterest.length === 0) {
+    // Add the new profile interests
+    profile.interests.forEach(async (intere: string) => {
+      const dbInterest = await prisma.interest.findUnique({
+        where: { name: intere },
+      });
       await prisma.profileInterest.create({
         data: {
           profileId: dbProfile.id,
           interestId: dbInterest!.id,
         },
       });
-    }
-  });
+    });
+  }
+  if (profile.projects) {
+    // Delete all profile projects
+    await prisma.profileProject.deleteMany({
+      where: { profileId: dbProfile.id },
+    });
+    // Delete all the profile projects
+    await prisma.profileProject.deleteMany({
+      where: { profileId: dbProfile.id },
+    });
+    // Add the new profile projects
+    profile.projects.forEach(async (projectName: string) => {
+      const dbProject = await prisma.project.findUnique({
+        where: { name: projectName },
+      });
+      await prisma.profileProject.create({
+        data: {
+          profileId: dbProfile.id,
+          projectId: dbProject!.id,
+        },
+      });
+    });
+  }
+  return dbProfile;
 }
