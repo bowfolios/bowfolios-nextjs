@@ -11,7 +11,7 @@ const FilterPage = async () => {
   loggedInProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
-    } | null
+    } | null,
   );
   const allInterests = await prisma.interest.findMany();
   const allProfiles = await prisma.profile.findMany();
