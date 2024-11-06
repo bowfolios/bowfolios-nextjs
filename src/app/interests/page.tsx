@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { Container, Row } from 'react-bootstrap';
 import { PageIDs } from '@/utilities/ids';
-import { pageStyle } from '@/utilities/pageStyle';
+import pageStyle from '@/utilities/pageStyle';
 import InterestCardHelper from './InterestCardHelper';
 
 const InterestsPage = async () => {
@@ -11,7 +11,9 @@ const InterestsPage = async () => {
   return (
     <Container id={PageIDs.interestsPage} style={pageStyle}>
       <Row xs={1} md={2} lg={4} className="g-2">
-        {interests.map((interest) => (<InterestCardHelper key={interest.id} interest={interest} />))}
+        {interests.map((interest) => (
+          <InterestCardHelper key={interest.id} interest={interest} />
+        ))}
       </Row>
     </Container>
   );
