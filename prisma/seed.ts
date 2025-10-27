@@ -29,7 +29,7 @@ async function main() {
         const dbInterest = await prisma.interest.findUnique({
           where: { name: intere },
         });
-        // console.log(`${dbProject.name} ${dbInterest!.name}`);
+        // console.log(`${dbProject.name} ${dbInterest!.name}, ${dbInterest}`);
         const dbProjectInterest = await prisma.projectInterest.findMany({
           where: { projectId: dbProject.id, interestId: dbInterest!.id },
         });
