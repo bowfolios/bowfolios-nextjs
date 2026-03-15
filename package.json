@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-application-template-1",
+  "name": "bowfolios-nextjs",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,11 +7,9 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "seed": "npx tsx src/seed.ts",
     "playwright-development": "npx playwright test",
     "playwright-ci": "next dev && npx playwright test"
-  },
-  "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -19,7 +17,6 @@
     "@prisma/client": "^7.4.2",
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",
-    "multiselect-react-dropdown": "^2.0.25",
     "dotenv": "^17.3.1",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
